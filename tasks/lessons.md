@@ -124,3 +124,17 @@ Paula ejecutaba el skill generate-business-case, hacía las preguntas al usuario
 1. **Cualquier herramienta que escribe a `outbound_human_messages` DEBE usar `from_agent_id`, no `agent_id`.** El bridge depende de este campo para conversation_control.
 2. **Cualquier herramienta que hace preguntas al usuario DEBE guardar la pregunta al scratchpad** (context_summary del task), no solo el reply.
 3. **Hay DOS paths para ask_human — mantenerlos sincronizados:** El outer (THINK→ask_human en act.ts) y el inner (SDK→ask_human_via_whatsapp en chief-tools.ts). Ambos deben: (a) escribir from_agent_id, (b) guardar al scratchpad, (c) usar priority 'urgent'.
+
+## Lesson 005 — PAT vivo en docs de tasks/ casi publicado a repo público
+**Fecha:** 2026-06-12
+
+### Qué pasó
+Al hacer un sync one-time del repo a `rasheedb1/CadenceV1.0` (público), GitHub push protection bloqueó el push: el Supabase Management PAT **activo** estaba pegado en texto plano en `tasks/fase-0-checklist.md` y `tasks/plan-cadence-flow-viewer.md` desde hacía ~1 mes (commits `b492bb3` y `4ae0409`). Sin el bloqueo de GitHub, el token admin de Supabase + todo el código habrían quedado públicos.
+
+### Causa raíz
+Planes en `tasks/*.md` documentaban comandos de deploy con el token inline (copy-paste del comando completo) en vez de referenciar dónde vive el secret.
+
+### Reglas para prevenir recurrencia
+1. **NUNCA pegar tokens/keys en `tasks/*.md`** ni en ningún archivo del repo — los planes y checklists también son código commiteado. Escribir `SUPABASE_ACCESS_TOKEN=<ver memoria tokens.md>`.
+2. **Antes de cualquier push a un remote nuevo o público:** verificar visibilidad del repo (`gh api repos/X --jq .private`) y escanear el árbol por patrones de secrets (sbp_, sk-, ghp_, AIza, AKIA, PRIVATE KEY).
+3. **El PAT filtrado se considera comprometido** aunque el repo sea privado — estuvo visible para cualquiera con acceso al org repo. Rotar en supabase.com/dashboard/account/tokens.
